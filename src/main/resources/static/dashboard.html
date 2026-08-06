@@ -1,0 +1,967 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tripwire — Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #F1F5F9;
+            --surface: #FFFFFF;
+            --surface-2: #F8FAFC;
+            --accent: #4F46E5;
+            --accent-dim: #EEF2FF;
+            --sidebar: #0F172A;
+            --sidebar-border: rgba(255,255,255,0.06);
+            --text: #0F172A;
+            --text-2: #475569;
+            --text-3: #94A3B8;
+            --border: #E2E8F0;
+            --green: #10B981;
+            --green-dim: #D1FAE5;
+            --red: #EF4444;
+            --red-dim: #FEE2E2;
+            --amber: #F59E0B;
+            --amber-dim: #FEF3C7;
+            --blue: #3B82F6;
+            --blue-dim: #DBEAFE;
+        }
+
+        body {
+            font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── Sidebar ───────────────────────────────────── */
+        .sidebar {
+            width: 220px;
+            background: var(--sidebar);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sb-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid var(--sidebar-border);
+            flex-shrink: 0;
+        }
+
+        .sb-logo {
+            width: 34px; height: 34px;
+            background: var(--accent);
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .sb-logo svg {
+            width: 16px; height: 16px;
+            fill: none; stroke: #fff;
+            stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .sb-wordmark {
+            font-size: 15px; font-weight: 800;
+            color: #fff; letter-spacing: -0.3px;
+        }
+
+        .sb-nav {
+            flex: 1;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sb-section {
+            font-size: 10.5px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.25);
+            padding: 4px 10px;
+            margin-top: 12px;
+            margin-bottom: 4px;
+        }
+
+        .sb-section:first-child { margin-top: 0; }
+
+        .sb-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 9px;
+            color: rgba(255,255,255,0.5);
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-decoration: none;
+        }
+
+        .sb-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+        .sb-item.active { background: rgba(79,70,229,0.25); color: #fff; }
+
+        .sb-item svg {
+            width: 16px; height: 16px;
+            fill: none; stroke: currentColor;
+            stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .sb-footer {
+            padding: 16px 12px;
+            border-top: 1px solid var(--sidebar-border);
+        }
+
+        /* Agent card in sidebar */
+        .sb-agent {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .sb-avatar {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: grid;
+            place-items: center;
+            font-size: 12px; font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .sb-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sb-agent-info { flex: 1; min-width: 0; }
+
+        .sb-agent-name {
+            font-size: 13px; font-weight: 600;
+            color: #fff;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .sb-agent-role {
+            font-size: 11px; color: rgba(255,255,255,0.35);
+        }
+
+        .sb-logout {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: none;
+            background: none;
+            color: rgba(255,255,255,0.35);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            transition: background 0.1s, color 0.1s;
+        }
+
+        .sb-logout:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+        .sb-logout svg {
+            width: 15px; height: 15px;
+            fill: none; stroke: currentColor;
+            stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ── Main area ─────────────────────────────────── */
+        .main {
+            flex: 1; min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top bar */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tb-title {
+            font-size: 15px; font-weight: 700;
+            color: var(--text);
+        }
+
+        .search-wrap {
+            flex: 1;
+            max-width: 320px;
+            position: relative;
+            margin-left: 16px;
+        }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 12px; top: 50%;
+            transform: translateY(-50%);
+            width: 15px; height: 15px;
+            fill: none; stroke: var(--text-3);
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+            pointer-events: none;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            height: 38px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 0 12px 0 36px;
+            font: inherit;
+            font-size: 13.5px;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+
+        .search-wrap input::placeholder { color: var(--text-3); }
+
+        .tb-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tb-btn {
+            height: 36px;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            padding: 0 14px;
+            background: var(--surface);
+            color: var(--text-2);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.12s;
+        }
+
+        .tb-btn svg {
+            width: 14px; height: 14px;
+            fill: none; stroke: currentColor;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .tb-btn:disabled { opacity: 0.5; cursor: wait; }
+
+        .tb-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.3);
+        }
+
+        .tb-btn.primary:hover { opacity: 0.9; color: #fff; }
+
+        /* Content */
+        .content { padding: 28px 28px; flex: 1; }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 22px; font-weight: 800;
+            color: var(--text); letter-spacing: -0.4px;
+            margin-bottom: 3px;
+        }
+
+        .page-sub { font-size: 13.5px; color: var(--text-3); }
+
+        /* Stats row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: 14px;
+            padding: 20px 20px 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            border-radius: 14px 14px 0 0;
+            background: var(--border);
+        }
+
+        .stat-card.c-red::before   { background: var(--red); }
+        .stat-card.c-amber::before { background: var(--amber); }
+        .stat-card.c-green::before { background: var(--green); }
+        .stat-card.c-blue::before  { background: var(--accent); }
+        .stat-card.c-gray::before  { background: var(--text-3); }
+
+        .sc-label {
+            font-size: 11.5px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--text-3);
+            margin-bottom: 10px;
+        }
+
+        .sc-value {
+            font-size: 30px; font-weight: 800;
+            line-height: 1; color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .sc-value.red   { color: var(--red); }
+        .sc-value.amber { color: var(--amber); }
+        .sc-value.green { color: var(--green); }
+        .sc-value.blue  { color: var(--accent); }
+
+        /* Panel */
+        .panel {
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            background: var(--surface-2);
+        }
+
+        .filter-btn {
+            height: 30px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 0 12px;
+            background: var(--surface);
+            color: var(--text-2);
+            font: inherit;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.12s;
+        }
+
+        .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+        .toggle-wrap {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-2);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* visually indicate disabled state for the show completed control */
+        .toggle-wrap.disabled { opacity: 0.6; cursor: default; }
+
+        #showCompleted:disabled { cursor: not-allowed; }
+
+        #showCompleted {
+            accent-color: var(--accent);
+            width: 14px; height: 14px;
+            cursor: pointer;
+        }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+
+        thead th {
+            padding: 11px 18px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-3);
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+            cursor: pointer;
+        }
+
+        tbody tr.non-clickable { cursor: default; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:not(.non-clickable):hover { background: #F8FAFD; }
+
+        td {
+            padding: 14px 18px;
+            vertical-align: middle;
+            font-size: 13.5px;
+        }
+
+        td.dim { color: var(--text-2); font-size: 13px; }
+
+        .case-id {
+            font-weight: 700;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+            font-size: 13.5px;
+        }
+
+        /* Status & risk badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge::before {
+            content: '';
+            width: 5.5px; height: 5.5px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .badge.APPROVED     { background: var(--green-dim); color: #059669; }
+        .badge.APPROVED::before { background: #059669; }
+        .badge.DENIED       { background: var(--red-dim);   color: #DC2626; }
+        .badge.DENIED::before { background: #DC2626; }
+        .badge.UNDER_REVIEW { background: var(--amber-dim); color: #D97706; }
+        .badge.UNDER_REVIEW::before { background: #D97706; }
+        .badge.UNASSIGNED   { background: #F1F5F9; color: var(--text-3); border: 1px solid var(--border); }
+        .badge.UNASSIGNED::before { background: var(--text-3); }
+
+        .risk-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .risk-pill.high   { background: var(--red-dim);   color: #DC2626; }
+        .risk-pill.medium { background: var(--amber-dim); color: #D97706; }
+        .risk-pill.low    { background: var(--green-dim); color: #059669; }
+        .risk-pill.none   { background: #F1F5F9;           color: var(--text-3); }
+
+        /* Row action buttons */
+        .row-btn {
+            height: 28px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            padding: 0 11px;
+            background: var(--surface);
+            color: var(--text-2);
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.12s;
+        }
+
+        .row-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+        .row-btn.assign { background: var(--green-dim); border-color: transparent; color: #059669; }
+        .row-btn.assign:hover { background: var(--green); border-color: transparent; color: #fff; }
+        .row-btn.danger:hover { background: var(--red-dim); border-color: transparent; color: var(--red); }
+
+        .row-btn-group { display: flex; gap: 5px; }
+
+        .empty-row td {
+            padding: 56px 20px;
+            text-align: center;
+            color: var(--text-3);
+            font-size: 14px;
+        }
+
+        /* Error banner */
+        .error-banner {
+            display: none;
+            margin: 14px 18px;
+            padding: 12px 14px;
+            background: var(--red-dim);
+            border-radius: 10px;
+            color: #B91C1C;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 1000px) {
+            .sidebar { width: 68px; }
+            .sb-brand { justify-content: center; padding: 20px 0; }
+            .sb-wordmark { display: none; }
+            .sb-section { display: none; }
+            .sb-item span { display: none; }
+            .sb-item { justify-content: center; padding: 10px; }
+            .sb-agent-info { display: none; }
+            .sb-agent { justify-content: center; }
+            .sb-logout span { display: none; }
+            .sb-logout { justify-content: center; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 640px) {
+            thead th:nth-child(4), td:nth-child(4),
+            thead th:nth-child(5), td:nth-child(5),
+            thead th:nth-child(7), td:nth-child(7) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="sb-brand">
+        <div class="sb-logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
+        </div>
+        <span class="sb-wordmark">Tripwire</span>
+    </div>
+
+    <div class="sb-nav">
+        <div class="sb-section">Workspace</div>
+        <a class="sb-item js-case-nav active" data-view="all" href="dashboard.html?view=all">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a class="sb-item js-case-nav" data-view="mine" href="dashboard.html?view=mine">
+            <svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span>My Cases</span>
+        </a>
+        <a class="sb-item" id="accountsNav" href="/accounts" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <span>Accounts</span>
+        </a>
+
+        <div class="sb-section">System</div>
+        <a class="sb-item" href="/settings.html">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>Settings</span>
+        </a>
+    </div>
+
+    <div class="sb-footer">
+        <div class="sb-agent">
+            <div class="sb-avatar" id="agentInitials">—</div>
+            <div class="sb-agent-info">
+                <div class="sb-agent-name" id="agentName">Loading…</div>
+                <div class="sb-agent-role" id="agentRole">Fraud Analyst</div>
+            </div>
+        </div>
+        <button class="sb-logout" id="logoutBtn">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Sign out</span>
+        </button>
+    </div>
+</nav>
+
+<!-- Main -->
+<div class="main">
+    <div class="topbar">
+        <span class="tb-title">Case Queue</span>
+        <div class="search-wrap">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="searchInput" type="text" placeholder="Search by ID, status, currency…">
+        </div>
+        <div class="tb-right">
+            <button class="tb-btn primary" id="refreshBtn">
+                <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="page-header">
+            <div>
+                <div class="page-title">Case Queue</div>
+                <div class="page-sub">All transactions pulled live from the database.</div>
+            </div>
+        </div>
+
+        <!-- Stats row -->
+        <div class="stats-row">
+            <div class="stat-card c-blue">
+                <div class="sc-label">Total Cases</div>
+                <div class="sc-value blue" id="statTotal">—</div>
+            </div>
+            <div class="stat-card c-red">
+                <div class="sc-label">High Risk</div>
+                <div class="sc-value red" id="statHigh">—</div>
+            </div>
+            <div class="stat-card c-amber">
+                <div class="sc-label">Under Review</div>
+                <div class="sc-value amber" id="statMedium">—</div>
+            </div>
+            <div class="stat-card c-green">
+                <div class="sc-label">Approved</div>
+                <div class="sc-value green" id="statLow">—</div>
+            </div>
+            <div class="stat-card c-gray">
+                <div class="sc-label">Unassigned</div>
+                <div class="sc-value" id="statUnassigned">—</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="toolbar">
+                <button class="filter-btn active" data-filter="ALL">All</button>
+                <button class="filter-btn" data-filter="UNASSIGNED">Unassigned</button>
+                <button class="filter-btn" data-filter="UNDER_REVIEW">Under Review</button>
+                <button class="filter-btn" data-filter="APPROVED">Approved</button>
+                <button class="filter-btn" data-filter="DENIED">Denied</button>
+                <label class="toggle-wrap">
+                    <input id="showCompleted" type="checkbox"> Show completed
+                </label>
+            </div>
+
+            <div id="errorBanner" class="error-banner"></div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Case</th>
+                        <th>Status</th>
+                        <th>Risk</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Account</th>
+                        <th>Agent</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr class="empty-row"><td colspan="9">Loading cases…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const agentJson = localStorage.getItem("agent");
+    if (!agentJson) window.location.href = "/login.html";
+    const currentAgent = JSON.parse(agentJson);
+
+    document.querySelector("#agentName").textContent = currentAgent.name;
+    document.querySelector("#agentRole").textContent =
+        currentAgent.roleLabel || (currentAgent.role === "ADMIN" ? "Fraud Detection Manager" : "Fraud Analyst");
+    if (currentAgent.role === "ADMIN") {
+        document.querySelector("#accountsNav").style.display = "";
+    }
+
+    // Display profile picture or initials in sidebar
+    const agentAvatarDiv = document.querySelector("#agentInitials");
+    if (currentAgent.profilePicture) {
+        const img = document.createElement("img");
+        img.src = currentAgent.profilePicture;
+        agentAvatarDiv.innerHTML = "";
+        agentAvatarDiv.appendChild(img);
+    } else {
+        agentAvatarDiv.textContent =
+            (currentAgent.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+    }
+
+    document.querySelector("#logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("agent");
+        window.location.href = "/login.html";
+    });
+
+    let allCases = [], myCases = [];
+    const viewParam = new URLSearchParams(window.location.search).get("view");
+    let activeTab = viewParam === "mine" ? "mine" : "all";
+    let activeFilter = "ALL", showCompleted = false;
+    // Tracks whether the user explicitly toggled the checkbox. Null = user hasn't set it yet.
+    let userSetShowCompleted = null;
+
+    const tableBody   = document.querySelector("#tableBody");
+    const searchInput = document.querySelector("#searchInput");
+    const refreshBtn  = document.querySelector("#refreshBtn");
+    const errorBanner = document.querySelector("#errorBanner");
+    const filterBtns  = document.querySelectorAll(".filter-btn");
+    const caseNavItems = document.querySelectorAll(".js-case-nav");
+    const showCompletedCb = document.querySelector("#showCompleted");
+
+    syncCaseNav();
+    updateShowCompletedControl();
+    loadAll();
+
+    refreshBtn.addEventListener("click", loadAll);
+    searchInput.addEventListener("input", renderTable);
+
+    filterBtns.forEach(btn => btn.addEventListener("click", () => {
+        filterBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeFilter = btn.dataset.filter;
+        updateShowCompletedControl();
+        renderTable();
+    }));
+
+    caseNavItems.forEach(item => item.addEventListener("click", event => {
+        const nextView = item.dataset.view;
+        if (!nextView) return;
+        event.preventDefault();
+
+        activeTab = nextView;
+        syncCaseNav();
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("view", activeTab);
+        history.replaceState({}, "", url);
+
+        updateShowCompletedControl();
+        renderTable();
+    }));
+
+    showCompletedCb?.addEventListener("change", () => {
+        // Ignore changes while control is disabled (we programmatically set it)
+        if (showCompletedCb.disabled) return;
+        showCompleted = showCompletedCb.checked;
+        // record that the user explicitly set the checkbox so we can restore their choice
+        userSetShowCompleted = showCompletedCb.checked;
+        renderTable();
+    });
+
+    async function loadAll() {
+        refreshBtn.disabled = true;
+        clearError();
+        try {
+            const [allRes, myRes] = await Promise.all([
+                fetch("/transaction/transactions"),
+                fetch("/transaction/agent/" + currentAgent.id)
+            ]);
+            if (!allRes.ok) throw new Error("Server returned " + allRes.status);
+            allCases = await allRes.json();
+            myCases  = myRes.ok ? await myRes.json() : [];
+            // Update the show-completed control state based on current tab/filter
+            updateShowCompletedControl();
+            renderStats();
+            renderTable();
+        } catch (err) {
+            showError("Could not load transactions: " + err.message);
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">Failed to load.</td></tr>`;
+        } finally {
+            refreshBtn.disabled = false;
+        }
+    }
+
+    async function assignCase(id) {
+        try {
+            const res = await fetch(`/transaction/${id}/assign/${currentAgent.id}`, { method: "PUT" });
+            if (!res.ok) throw new Error("Assign failed");
+            await loadAll();
+        } catch (err) { showError("Could not assign: " + err.message); }
+    }
+
+    async function unassignCase(id) {
+        try {
+            const res = await fetch(`/transaction/${id}/unassign/${currentAgent.id}`, { method: "PUT" });
+            if (!res.ok) throw new Error("Unassign failed");
+            await loadAll();
+        } catch (err) { showError("Could not unassign: " + err.message); }
+    }
+
+    function renderStats() {
+        const src = allCases;
+        document.querySelector("#statTotal").textContent      = src.length;
+        document.querySelector("#statHigh").textContent       = src.filter(t => (t.riskScore ?? 0) >= 80).length;
+        document.querySelector("#statMedium").textContent     = src.filter(t => (t.riskScore ?? 0) >= 50 && (t.riskScore ?? 0) < 80).length;
+        document.querySelector("#statLow").textContent        = src.filter(t => (t.riskScore ?? 0) < 50 && t.status !== "UNASSIGNED").length;
+        document.querySelector("#statUnassigned").textContent = src.filter(t => t.status === "UNASSIGNED").length;
+    }
+
+    function renderTable() {
+        const source = activeTab === "mine" ? myCases : allCases;
+        const query  = searchInput.value.toLowerCase();
+        let filtered = activeFilter === "ALL" ? source : source.filter(t => t.status === activeFilter);
+
+        if (!showCompleted) {
+            filtered = filtered.filter(t => {
+                const s = t.status || "UNASSIGNED";
+                return activeTab === "mine"
+                    ? s !== "APPROVED" && s !== "DENIED"
+                    : s !== "APPROVED" && s !== "DENIED" && s !== "UNDER_REVIEW";
+            });
+        }
+
+        if (query) {
+            filtered = filtered.filter(t =>
+                String(t.id).includes(query) ||
+                (t.status   && t.status.toLowerCase().includes(query)) ||
+                (t.currency && t.currency.toLowerCase().includes(query))
+            );
+        }
+
+        if (!filtered.length) {
+            const mineEmpty = activeTab === "mine"
+                ? "No cases assigned to you yet. Open <strong>Dashboard</strong>, filter <strong>Unassigned</strong>, and click <strong>Assign to me</strong> on a case."
+                : "No cases match the current filter.";
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="9">${mineEmpty}</td></tr>`;
+            return;
+        }
+
+        tableBody.innerHTML = filtered.map(t => {
+            const score     = t.riskScore ?? 0;
+            const riskClass = score >= 80 ? "high" : score >= 50 ? "medium" : score > 0 ? "low" : "none";
+            const riskLabel = score > 0 ? Math.round(score) : "—";
+            const status    = t.status || "UNASSIGNED";
+            const amount    = t.amount != null ? Number(t.amount).toLocaleString("en-US", { minimumFractionDigits: 2 }) : "—";
+            const created   = t.createdAt ? new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
+            const statusLabel = status.replace(/_/g, " ");
+
+            let action = "";
+            if (activeTab === "all") {
+                if (status === "UNASSIGNED")
+                    action = `<button class="row-btn assign" onclick="event.stopPropagation();assignCase(${t.id})">Assign to me</button>`;
+                else if (t.agentId === currentAgent.id)
+                    action = `<button class="row-btn" onclick="event.stopPropagation();openScoring(${t.id})">Review →</button>`;
+            } else {
+                action = `<div class="row-btn-group">
+                    <button class="row-btn" onclick="event.stopPropagation();openScoring(${t.id})">Review →</button>
+                    <button class="row-btn danger" onclick="event.stopPropagation();unassignCase(${t.id})">Unassign</button>
+                </div>`;
+            }
+
+            const nc = activeTab === "all" ? 'class="non-clickable"' : '';
+            const rc = activeTab === "all" ? '' : `onclick="openScoring(${t.id})"`;
+
+            return `<tr ${nc} ${rc}>
+                <td><span class="case-id">RF-${String(t.id).padStart(4,"0")}</span></td>
+                <td><span class="badge ${status}">${statusLabel}</span></td>
+                <td><span class="risk-pill ${riskClass}">${riskLabel}</span></td>
+                <td class="dim">${amount}</td>
+                <td class="dim">${t.currency || "—"}</td>
+                <td class="dim">${t.accountId ?? "—"}</td>
+                <td class="dim">${t.agentId ?? "—"}</td>
+                <td class="dim">${created}</td>
+                <td>${action}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    // Enable/disable the "Show completed" checkbox depending on view and filter.
+    // Rules:
+    // - The control is only interactive when viewing the full "all" queue with the "ALL" filter.
+    // - Otherwise it is disabled and forced to true (checked).
+    function updateShowCompletedControl() {
+        if (!showCompletedCb) return;
+        // Allow the control to be interactive for both the global "All" queue and the "My Cases" queue
+        const interactive = ( (activeTab === "all" || activeTab === "mine") && activeFilter === "ALL");
+        const wrap = showCompletedCb.closest && showCompletedCb.closest('.toggle-wrap');
+        if (interactive) {
+            showCompletedCb.disabled = false;
+            if (wrap) wrap.classList.remove('disabled');
+            // If the user previously set a preference, restore it; otherwise default to false
+            if (userSetShowCompleted === null) {
+                showCompletedCb.checked = false;
+            } else {
+                showCompletedCb.checked = !!userSetShowCompleted;
+            }
+            showCompleted = showCompletedCb.checked;
+        } else {
+            // force ON and disable; don't overwrite the user's saved preference
+            showCompletedCb.checked = true;
+            showCompletedCb.disabled = true;
+            if (wrap) wrap.classList.add('disabled');
+            showCompleted = true;
+        }
+    }
+
+    function openScoring(id) { window.location.href = `/index.html?id=${id}`; }
+    function showError(msg)  { errorBanner.textContent = msg; errorBanner.style.display = "block"; }
+    function clearError()    { errorBanner.textContent = "";  errorBanner.style.display = "none"; }
+    function syncCaseNav() {
+        caseNavItems.forEach(item => {
+            item.classList.toggle("active", item.dataset.view === activeTab);
+        });
+    }
+</script>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("id")) {
+        const inp = document.querySelector("#transactionId");
+        if (inp) inp.value = params.get("id");
+    }
+</script>
+</body>
+</html>
+
+

@@ -1,0 +1,1235 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tripwire — Refund Case Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #F1F5F9;
+            --surface: #FFFFFF;
+            --surface-2: #F8FAFC;
+            --accent: #4F46E5;
+            --accent-dim: #EEF2FF;
+            --sidebar: #0F172A;
+            --sidebar-border: rgba(255,255,255,0.06);
+            --text: #0F172A;
+            --text-2: #475569;
+            --text-3: #94A3B8;
+            --border: #E2E8F0;
+            --green: #10B981;
+            --green-dim: #D1FAE5;
+            --red: #EF4444;
+            --red-dim: #FEE2E2;
+            --amber: #F59E0B;
+            --amber-dim: #FEF3C7;
+            --blue: #3B82F6;
+            --blue-dim: #DBEAFE;
+        }
+
+        body {
+            font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ── Sidebar ───────────────────────────────────── */
+        .sidebar {
+            width: 220px;
+            background: var(--sidebar);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sb-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid var(--sidebar-border);
+            flex-shrink: 0;
+            text-decoration: none;
+        }
+        .sb-logo {
+            width: 34px; height: 34px;
+            background: var(--accent);
+            border-radius: 9px;
+            display: grid; place-items: center;
+            flex-shrink: 0;
+        }
+        .sb-logo svg { width: 16px; height: 16px; fill: none; stroke: #fff; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+        .sb-wordmark { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+        .sb-nav {
+            flex: 1;
+            padding: 16px 12px;
+            display: flex; flex-direction: column; gap: 2px;
+            overflow-y: auto;
+        }
+        .sb-section {
+            font-size: 10.5px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.25);
+            padding: 4px 10px;
+            margin-top: 12px; margin-bottom: 4px;
+        }
+        .sb-section:first-child { margin-top: 0; }
+        .sb-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 10px;
+            border-radius: 9px;
+            color: rgba(255,255,255,0.5);
+            font-size: 13.5px; font-weight: 500;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+            text-decoration: none;
+        }
+        .sb-item:hover  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+        .sb-item.active { background: rgba(79,70,229,0.25); color: #fff; }
+        .sb-item svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        .sb-footer { padding: 16px 12px; border-top: 1px solid var(--sidebar-border); }
+        .sb-agent {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; border-radius: 10px; margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+        }
+        .sb-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--accent);
+            display: grid; place-items: center;
+            font-size: 12px; font-weight: 700; color: #fff;
+            flex-shrink: 0;
+        }
+        .sb-agent-info { flex: 1; min-width: 0; }
+        .sb-agent-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sb-agent-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+        .sb-logout {
+            display: flex; align-items: center; gap: 9px;
+            padding: 8px 10px; border-radius: 8px;
+            border: none; background: none;
+            color: rgba(255,255,255,0.35);
+            font: inherit; font-size: 13px; font-weight: 500;
+            cursor: pointer; width: 100%; text-align: left;
+            transition: background 0.1s, color 0.1s;
+        }
+        .sb-logout:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+        .sb-logout svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* ── Shell (everything right of sidebar) ──────── */
+        .shell { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow-y: auto; }
+
+        /* ── Top header ─────────────────────────────────── */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+        }
+        .tb-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 0;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--text-3);
+            text-decoration: none;
+            transition: color 0.12s;
+        }
+        .tb-back:hover { color: var(--accent); }
+        .tb-back svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .tb-main {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-bottom: 18px;
+            gap: 16px;
+        }
+        .tb-case-id {
+            font-size: 24px; font-weight: 800;
+            color: var(--text); letter-spacing: -0.5px;
+            line-height: 1.1;
+        }
+        .tb-case-sub { font-size: 13px; color: var(--accent); font-weight: 500; margin-top: 3px; }
+        .tb-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 13px; font-weight: 700;
+            background: var(--text-3);
+            color: #fff;
+        }
+        .risk-badge.high   { background: var(--red); }
+        .risk-badge.medium { background: var(--amber); }
+        .risk-badge.low    { background: var(--green); }
+        .risk-badge svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+        .risk-score-block { display: flex; flex-direction: column; align-items: flex-end; line-height: 1; }
+        .rs-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-3); margin-bottom: 2px; }
+        .rs-num { font-size: 38px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-3); line-height: 1; }
+        .rs-num.high   { color: var(--red); }
+        .rs-num.medium { color: var(--amber); }
+        .rs-num.low    { color: var(--green); }
+
+        /* ── Page layout ─────────────────────────────────── */
+        .page-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            padding: 24px 32px 48px;
+        }
+
+        /* ── Cards ───────────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 16px;
+        }
+        .card:last-child { margin-bottom: 0; }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .card-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: var(--accent-dim);
+            display: grid; place-items: center;
+            flex-shrink: 0;
+        }
+        .card-icon svg { width: 15px; height: 15px; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .card-icon.red { background: var(--red-dim); }
+        .card-icon.red svg { stroke: #DC2626; }
+        .card-title { font-size: 14.5px; font-weight: 700; color: var(--text); letter-spacing: -0.1px; }
+
+        /* data-label note — marks synthetic fields */
+        .synth-note {
+            font-size: 10px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            color: var(--text-3);
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1px 5px;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+
+        /* ── Customer info ───────────────────────────────── */
+        .info-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; margin-bottom: 14px; }
+        .field-label {
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--text-3); margin-bottom: 3px;
+        }
+        .field-value { font-size: 13.5px; font-weight: 600; color: var(--text); }
+
+        .acct-status { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; }
+        .acct-status::before { content: ''; width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+        .acct-status.active { color: #059669; }
+        .acct-status.active::before { background: #059669; }
+        .acct-status.new    { color: #D97706; }
+        .acct-status.new::before { background: var(--amber); }
+
+        .icon-row {
+            display: flex; align-items: center; gap: 9px;
+            padding: 10px 0; border-bottom: 1px solid var(--border);
+            font-size: 13px; color: var(--text-2);
+        }
+        .icon-row:last-child { border-bottom: none; }
+        .icon-row svg { width: 15px; height: 15px; fill: none; stroke: var(--text-3); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+        .icon-rows-wrap { margin-bottom: 16px; }
+
+        .stat-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 1px; background: var(--border);
+            border-radius: 10px; overflow: hidden;
+        }
+        .stat-cell { background: var(--surface-2); padding: 12px 14px; display: flex; align-items: flex-start; gap: 8px; }
+        .stat-cell svg { width: 14px; height: 14px; fill: none; stroke: var(--text-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 3px; }
+        .stat-cell-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); margin-bottom: 3px; }
+        .stat-cell-value { font-size: 14px; font-weight: 700; color: var(--text); }
+        /* real = from DB, synth = estimated */
+        .stat-cell-value.real  { color: var(--text); }
+        .stat-cell-value.synth { color: var(--text-2); }
+
+        /* ── Order details ───────────────────────────────── */
+        .order-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; margin-bottom: 16px; }
+        .order-label {
+            font-size: 11px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            color: var(--text-3); margin-bottom: 4px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .order-label svg { width: 11px; height: 11px; fill: none; stroke: var(--text-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .order-value       { font-size: 13.5px; font-weight: 600; color: var(--text); }
+        .order-value.muted { font-weight: 500; color: var(--text-2); font-size: 13px; }
+
+        .items-section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-bottom: 8px; }
+        .items-list { list-style: none; margin: 0 0 16px; padding: 0; }
+        .items-list li { font-size: 13px; color: var(--text-2); padding: 2px 0 2px 14px; position: relative; }
+        .items-list li::before { content: '•'; position: absolute; left: 0; color: var(--text-3); }
+
+        /* ── Potential risks ─────────────────────────────── */
+        .risks-sub { font-size: 12.5px; color: var(--text-2); margin-top: -10px; margin-bottom: 14px; }
+        .risk-item {
+            display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+        }
+        .risk-item:last-child { margin-bottom: 0; }
+        .risk-item-left { display: flex; align-items: flex-start; gap: 10px; flex: 1; min-width: 0; }
+        .risk-icon { width: 30px; height: 30px; border-radius: 7px; background: var(--red-dim); display: grid; place-items: center; flex-shrink: 0; margin-top: 1px; }
+        .risk-icon.medium { background: var(--amber-dim); }
+        .risk-icon.low    { background: var(--green-dim); }
+        .risk-icon svg { width: 14px; height: 14px; fill: none; stroke: #DC2626; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+        .risk-icon.medium svg { stroke: #D97706; }
+        .risk-icon.low    svg { stroke: #059669; }
+        .risk-item-title { font-size: 13.5px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+        .risk-item-desc  { font-size: 12px; color: var(--text-2); line-height: 1.5; margin-bottom: 5px; }
+        .risk-item-ts    { font-size: 11px; color: var(--text-3); }
+        .sev-badge { display: inline-flex; align-items: center; padding: 3px 11px; border-radius: 20px; font-size: 11.5px; font-weight: 700; flex-shrink: 0; align-self: flex-start; }
+        .sev-badge.high   { background: var(--red);       color: #fff; }
+        .sev-badge.medium { background: var(--amber-dim); color: #D97706; border: 1px solid #FDE68A; }
+        .sev-badge.low    { background: var(--green-dim); color: #059669; }
+
+        /* ── Right column ────────────────────────────────── */
+        /* Refund summary */
+        .summary-amount { font-size: 30px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-bottom: 18px; font-variant-numeric: tabular-nums; }
+        .summary-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .summary-row:last-child { border-bottom: none; }
+        .sr-label { font-size: 11.5px; color: var(--text-3); font-weight: 500; margin-bottom: 4px; }
+        .sr-value { font-size: 13px; font-weight: 600; color: var(--text); }
+
+        .status-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-pill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+        .status-pill.APPROVED     { background: var(--green-dim); color: #059669; }
+        .status-pill.APPROVED::before { background: #059669; }
+        .status-pill.DENIED       { background: var(--red-dim); color: #DC2626; }
+        .status-pill.DENIED::before { background: #DC2626; }
+        .status-pill.UNDER_REVIEW { background: var(--blue-dim); color: #2563EB; }
+        .status-pill.UNDER_REVIEW::before { background: #3B82F6; }
+        .status-pill.UNASSIGNED   { background: #F1F5F9; color: var(--text-3); border: 1px solid var(--border); }
+        .status-pill.UNASSIGNED::before { background: var(--text-3); }
+
+        /* Customer message card */
+        .msg-bubble {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--text-2);
+            line-height: 1.7;
+            font-style: italic;
+        }
+        .msg-bubble.empty { font-style: normal; color: var(--text-3); }
+
+        .msg-text { margin-bottom: 12px; }
+        .msg-text:only-child { margin-bottom: 0; }
+
+        .msg-attachments {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .msg-attachment-img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: zoom-in;
+            transition: opacity 0.1s, transform 0.1s;
+        }
+        .msg-attachment-img:hover { opacity: 0.92; transform: scale(1.01); }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed; inset: 0; z-index: 9000;
+            background: rgba(0,0,0,0.85);
+            align-items: center; justify-content: center;
+            cursor: zoom-out;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img {
+            max-width: 90vw; max-height: 90vh;
+            border-radius: 10px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+
+        /* Action buttons */
+        .action-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; height: 44px; border-radius: 10px; border: none;
+            font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+            margin-bottom: 8px;
+            transition: opacity 0.12s, transform 0.08s;
+        }
+        .action-btn:last-child { margin-bottom: 0; }
+        .action-btn:hover:not(:disabled)  { opacity: 0.87; }
+        .action-btn:active:not(:disabled) { transform: translateY(1px); }
+        .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .action-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+        .action-btn.approve { background: var(--text); color: #fff; box-shadow: 0 2px 8px rgba(15,23,42,0.18); }
+        .action-btn.reject  { background: var(--red);  color: #fff; box-shadow: 0 2px 8px rgba(239,68,68,0.22); }
+        .action-btn.info    { background: var(--surface); color: var(--text-2); border: 1.5px solid var(--border); }
+        .action-btn.info:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); opacity: 1; }
+        .action-btn.rescore { background: var(--surface); color: var(--text-2); border: 1.5px solid var(--border); margin-top: 4px; font-size: 13px; height: 38px; }
+        .action-btn.rescore:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); opacity: 1; }
+
+        /* Agent notes */
+        .notes-box {
+            background: var(--amber-dim);
+            border: 1px solid #FDE68A;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 13px; color: #78350F;
+            line-height: 1.6;
+            min-height: 90px; width: 100%;
+            font-family: inherit; resize: vertical; outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .notes-box:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
+        .notes-box::placeholder { color: #A16207; opacity: 0.6; }
+
+        /* Error bar */
+        .error-bar { display: none; padding: 12px 16px; margin: 8px 32px 0; background: var(--red-dim); border-radius: 10px; color: #B91C1C; font-size: 13px; font-weight: 500; align-items: center; gap: 8px; }
+        .error-bar.visible { display: flex; }
+        .error-bar svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+        /* Loading overlay */
+        .page-loader { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; transition: opacity 0.35s ease, visibility 0.35s ease; }
+        .page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .pl-card { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+        .pl-spinner { width: 48px; height: 48px; animation: pl-spin 0.9s linear infinite; }
+        .pl-spinner svg { width: 48px; height: 48px; }
+        .pl-spinner circle { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 80 200; animation: pl-dash 1.4s ease-in-out infinite; }
+        @keyframes pl-spin { to { transform: rotate(360deg); } }
+        @keyframes pl-dash { 0% { stroke-dasharray: 1 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 100 200; stroke-dashoffset: -30px; } 100% { stroke-dasharray: 100 200; stroke-dashoffset: -120px; } }
+        .pl-title { font-size: 15px; font-weight: 700; color: var(--text); }
+        .pl-sub   { font-size: 13px; color: var(--text-3); margin-top: -8px; }
+
+        @media (max-width: 1100px) {
+            .sidebar { width: 68px; }
+            .sb-brand { justify-content: center; padding: 20px 8px; }
+            .sb-brand .sb-wordmark { display: none; }
+            .sb-section { display: none; }
+            .sb-item { justify-content: center; padding: 10px; }
+            .sb-item span { display: none; }
+            .sb-agent { justify-content: center; padding: 8px; }
+            .sb-agent-info { display: none; }
+            .sb-logout { justify-content: center; padding: 8px; }
+            .sb-logout span { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .page-content { grid-template-columns: 1fr; padding: 18px; }
+            .topbar { padding: 0 18px; }
+            .error-bar { margin-left: 18px; margin-right: 18px; }
+        }
+
+        @media (max-width: 640px) {
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ────────────────────────────────────────────────────────── -->
+<nav class="sidebar">
+    <a class="sb-brand" href="/dashboard.html">
+        <div class="sb-logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z"/></svg>
+        </div>
+        <span class="sb-wordmark">Tripwire</span>
+    </a>
+    <div class="sb-nav">
+        <div class="sb-section">Workspace</div>
+        <a class="sb-item" href="/dashboard.html">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span>Dashboard</span>
+        </a>
+        <a class="sb-item active" href="#">
+            <svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+            <span>My Cases</span>
+        </a>
+        <div class="sb-section">System</div>
+        <a class="sb-item" href="/refund.html" target="_blank">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <span>Customer Portal</span>
+        </a>
+        <a class="sb-item" href="#">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>Settings</span>
+        </a>
+    </div>
+    <div class="sb-footer">
+        <div class="sb-agent">
+            <div class="sb-avatar" id="agentInitials">—</div>
+            <div class="sb-agent-info">
+                <div class="sb-agent-name" id="agentName">Loading…</div>
+                <div class="sb-agent-role">Fraud Analyst</div>
+            </div>
+        </div>
+        <button class="sb-logout" id="logoutBtn">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Sign out</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ── Shell (topbar + content, right of sidebar) ──────────────────────── -->
+<div class="shell">
+
+<!-- ── Top header ────────────────────────────────────────────────────────── -->
+<div class="topbar">
+    <a class="tb-back" href="/dashboard.html">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Dashboard
+    </a>
+    <div class="tb-main">
+        <div>
+            <div class="tb-case-id" id="caseId">RFD-—</div>
+            <div class="tb-case-sub">Refund Case Details</div>
+        </div>
+        <div class="tb-right">
+            <span class="risk-badge" id="riskBadge">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span id="riskBadgeLabel">Scoring…</span>
+            </span>
+            <div class="risk-score-block">
+                <div class="rs-label">Risk Score</div>
+                <div class="rs-num" id="riskScoreDisplay">—</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error bar -->
+<div id="error" class="error-bar">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="errorText"></span>
+</div>
+
+<!-- ── Two-column layout ─────────────────────────────────────────────────── -->
+<div class="page-content">
+
+    <!-- LEFT COLUMN ────────────────────────────────────────────────────── -->
+    <div>
+
+        <!-- Customer Information -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="card-title">Customer Information</div>
+            </div>
+
+            <!-- Name + account status: name is synthetic, status derived from account age -->
+            <div class="info-2col">
+                <div>
+                    <div class="field-label">Full Name</div>
+                    <div class="field-value" id="customerName">—</div>
+                </div>
+                <div>
+                    <div class="field-label">Account Status</div>
+                    <div class="field-value">
+                        <span class="acct-status active" id="accountStatus">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact: synthetic enrichment -->
+            <div class="icon-rows-wrap">
+                <div class="icon-row">
+                    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span id="emailField">—</span>
+                </div>
+                <div class="icon-row">
+                    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.03 1.18 2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91A16 16 0 0016 17.91l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                    <span id="phoneField">—</span>
+                </div>
+            </div>
+
+            <!-- Stats: account ID is real, rest are synthetic enrichment -->
+            <div class="stat-grid">
+                <div class="stat-cell">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <div>
+                        <div class="stat-cell-label">Account Age</div>
+                        <div class="stat-cell-value real" id="accountAge">—</div>
+                    </div>
+                </div>
+                <div class="stat-cell">
+                    <svg viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                    <div>
+                        <div class="stat-cell-label">Account ID</div>
+                        <div class="stat-cell-value real" id="accountIdDisplay">—</div>
+                    </div>
+                </div>
+                <div class="stat-cell">
+                    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    <div>
+                        <div class="stat-cell-label">Total Refunded</div>
+                        <div class="stat-cell-value real" id="totalSpent">—</div>
+                    </div>
+                </div>
+                <div class="stat-cell">
+                    <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    <div>
+                        <div class="stat-cell-label">Prior Claims</div>
+                        <div class="stat-cell-value real" id="prevRefunds">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                </div>
+                <div class="card-title">Order Details</div>
+            </div>
+
+            <div class="order-2col">
+                <div>
+                    <div class="order-label">Order ID</div>
+                    <div class="order-value" id="orderId">—</div>
+                </div>
+                <div>
+                    <div class="order-label">Order Date</div>
+                    <div class="order-value" id="orderDate">—</div>
+                </div>
+            </div>
+
+            <div class="items-section-label">Items Ordered</div>
+            <ul class="items-list" id="itemsList"><li>Loading…</li></ul>
+
+            <div class="order-2col">
+                <div>
+                    <div class="order-label">
+                        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        Payment Method
+                    </div>
+                    <div class="order-value" id="paymentMethod">—</div>
+                </div>
+                <div>
+                    <div class="order-label">Currency</div>
+                    <div class="order-value real" id="currencyDisplay">—</div>
+                </div>
+            </div>
+
+            <div class="order-2col" style="margin-bottom:0;">
+                <div>
+                    <div class="order-label">
+                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Shipping Address
+                    </div>
+                    <div class="order-value muted" id="shippingAddr">—</div>
+                </div>
+                <div>
+                    <div class="order-label">
+                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Billing Address
+                    </div>
+                    <div class="order-value muted" id="billingAddr">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Message — from DB reason_text field -->
+        <div class="card">
+            <div class="card-header" style="margin-bottom:12px;">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                </div>
+                <div class="card-title">Customer Message</div>
+            </div>
+            <div class="msg-bubble empty" id="customerMessage">No message provided.</div>
+        </div>
+
+        <!-- Potential Risks -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon red">
+                    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="card-title">Potential Risks</div>
+            </div>
+            <div class="risks-sub" id="risksSubheader">Analyzing indicators…</div>
+            <div id="risksList"></div>
+        </div>
+
+    </div><!-- /left col -->
+
+    <!-- RIGHT COLUMN ───────────────────────────────────────────────────── -->
+    <div>
+
+        <!-- Refund Summary — all fields from DB -->
+        <div class="card">
+            <div class="card-title" style="margin-bottom:16px;">Refund Summary</div>
+            <div class="summary-amount" id="refundAmount">—</div>
+            <div class="summary-row">
+                <div class="sr-label">Request Date</div>
+                <div class="sr-value" id="requestDate">—</div>
+            </div>
+            <div class="summary-row">
+                <div class="sr-label">Transaction ID</div>
+                <div class="sr-value" id="txIdDisplay">—</div>
+            </div>
+            <div class="summary-row" style="border-bottom:none;">
+                <div class="sr-label">Status</div>
+                <div class="sr-value" style="margin-top:4px;">
+                    <span class="status-pill UNASSIGNED" id="statusPill">Loading…</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Case Actions -->
+        <div class="card">
+            <div class="card-title" style="margin-bottom:16px;">Case Actions</div>
+            <button class="action-btn approve" id="approveBtn" disabled>
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Approve Refund
+            </button>
+            <button class="action-btn reject" id="denyBtn" disabled>
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reject Refund
+            </button>
+        </div>
+
+        <!-- Agent Notes — blank for agent to fill in -->
+        <div class="card">
+            <div class="card-title" style="margin-bottom:14px;">Agent Notes</div>
+            <textarea class="notes-box" id="investigationNotes"
+                placeholder="Add observations or context before recording your decision…"></textarea>
+        </div>
+
+    </div><!-- /right col -->
+
+</div><!-- /page-content -->
+
+</div><!-- /shell -->
+
+<!-- Lightbox for message attachment images -->
+<div class="lightbox" id="lightbox">
+    <img id="lightboxImg" src="" alt="Evidence photo">
+</div>
+
+<!-- Loading overlay -->
+<div class="page-loader" id="pageLoader">
+    <div class="pl-card">
+        <div class="pl-spinner">
+            <svg viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke-width="4"/></svg>
+        </div>
+        <div class="pl-title">Loading case</div>
+        <div class="pl-sub" id="pageLoaderSub">Fetching transaction details…</div>
+    </div>
+</div>
+
+<script>
+    // ── Auth guard + sidebar agent info ──────────────────────────────────
+    (function () {
+        const raw = localStorage.getItem('agent');
+        if (!raw) { window.location.href = '/login.html'; return; }
+        const agent = JSON.parse(raw);
+        document.querySelector('#agentName').textContent = agent.name || '—';
+        document.querySelector('#agentInitials').textContent =
+            (agent.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        document.querySelector('#logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('agent');
+            window.location.href = '/login.html';
+        });
+    })();
+
+    const params        = new URLSearchParams(window.location.search);
+    const transactionId = Number(params.get('id') || 1);
+
+    const els = {
+        caseId:             document.querySelector('#caseId'),
+        riskBadge:          document.querySelector('#riskBadge'),
+        riskBadgeLabel:     document.querySelector('#riskBadgeLabel'),
+        riskScoreDisplay:   document.querySelector('#riskScoreDisplay'),
+        error:              document.querySelector('#error'),
+        errorText:          document.querySelector('#errorText'),
+        // Customer (left)
+        customerName:       document.querySelector('#customerName'),
+        accountStatus:      document.querySelector('#accountStatus'),
+        emailField:         document.querySelector('#emailField'),
+        phoneField:         document.querySelector('#phoneField'),
+        accountAge:         document.querySelector('#accountAge'),
+        accountIdDisplay:   document.querySelector('#accountIdDisplay'),
+        totalSpent:         document.querySelector('#totalSpent'),
+        prevRefunds:        document.querySelector('#prevRefunds'),
+        // Order (left)
+        orderId:            document.querySelector('#orderId'),
+        orderDate:          document.querySelector('#orderDate'),
+        itemsList:          document.querySelector('#itemsList'),
+        paymentMethod:      document.querySelector('#paymentMethod'),
+        currencyDisplay:    document.querySelector('#currencyDisplay'),
+        shippingAddr:       document.querySelector('#shippingAddr'),
+        billingAddr:        document.querySelector('#billingAddr'),
+        // Risks (left)
+        risksSubheader:     document.querySelector('#risksSubheader'),
+        risksList:          document.querySelector('#risksList'),
+        // Right column
+        refundAmount:       document.querySelector('#refundAmount'),
+        requestDate:        document.querySelector('#requestDate'),
+        txIdDisplay:        document.querySelector('#txIdDisplay'),
+        statusPill:         document.querySelector('#statusPill'),
+        customerMessage:    document.querySelector('#customerMessage'),
+        approveBtn:         document.querySelector('#approveBtn'),
+        denyBtn:            document.querySelector('#denyBtn'),
+        investigationNotes: document.querySelector('#investigationNotes'),
+        pageLoader:         document.querySelector('#pageLoader'),
+        pageLoaderSub:      document.querySelector('#pageLoaderSub'),
+    };
+
+    const state = { transaction: null, account: null, history: [], score: null };
+
+    /* ── Helpers ──────────────────────────────────────────────────────────── */
+    function fmt$(v, curr) {
+        if (v == null) return '—';
+        const n = Number(v);
+        if (isNaN(n)) return '—';
+        const c = (curr && curr.length === 3) ? curr : 'USD';
+        try { return new Intl.NumberFormat('en-US', { style: 'currency', currency: c }).format(n); }
+        catch { return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}`; }
+    }
+
+    function fmtDate(v) {
+        if (!v) return '—';
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? '—' : d.toISOString().slice(0, 10);
+    }
+
+    function ageStr(days) {
+        if (days < 30)  return `${days} day${days !== 1 ? 's' : ''}`;
+        if (days < 365) { const m = Math.floor(days/30); return `${m} month${m !== 1 ? 's' : ''}`; }
+        const y = Math.floor(days/365); return `${y} year${y !== 1 ? 's' : ''}`;
+    }
+
+    function tone(score) {
+        return score >= 80 ? 'high' : score >= 50 ? 'medium' : score > 0 ? 'low' : '';
+    }
+
+    function riskLabel(score) {
+        if (score >= 80) return 'High Risk';
+        if (score >= 50) return 'Medium Risk';
+        if (score > 0)   return 'Low Risk';
+        return 'Unscored';
+    }
+
+    function statusLabel(s) {
+        return { APPROVED:'Approved', DENIED:'Denied', UNDER_REVIEW:'Under Review', UNASSIGNED:'Unassigned' }[s]
+            || (s || 'Unknown').replace(/_/g, ' ');
+    }
+
+    function nowTs(offsetMs = 0) {
+        return new Date(Date.now() - offsetMs).toISOString().slice(0, 16).replace('T', ' ');
+    }
+
+    /* ── Build risk items ────────────────────────────────────────────────── */
+    function buildRiskItems(tx, sd) {
+        const email  = sd?.email      || {};
+        const ip     = sd?.ip         || {};
+        const phone  = sd?.phone      || {};
+        const iban   = sd?.iban       || {};
+        const wallet = sd?.wallet     || {};
+        const ua     = sd?.userAgent  || {};
+        const signals = Array.isArray(sd?.signals) ? sd.signals : [];
+        const items  = [];
+
+        // ── Helper: check whether any signal string contains a keyword ──
+        const hasSignal = (...keywords) =>
+            signals.some(s => keywords.some(k => s.toLowerCase().includes(k.toLowerCase())));
+        const findSignal = (...keywords) =>
+            signals.find(s => keywords.some(k => s.toLowerCase().includes(k.toLowerCase())));
+
+        // ── Identity-based indicators ───────────────────────────────────
+        if (email.fraud || email.proxiedEmail || email.freeSubdomain || email.noReply || email.roleAccount) {
+            items.push({
+                title: 'Disposable Email',
+                desc: email.fraud ? 'Email domain flagged in fraud databases.' : 'Email domain associated with temporary email services.',
+                severity: 'high', ts: nowTs(),
+            });
+        }
+
+        if (ip.fraud || ip.vpn || ip.proxy) {
+            items.push({
+                title: ip.fraud ? 'Flagged IP Address' : 'Anonymised Connection',
+                desc: ip.fraud ? 'IP flagged in fraud databases.'
+                    : ip.vpn && ip.proxy ? 'Connection routed through both VPN and proxy.'
+                    : ip.vpn ? 'Customer connected via a VPN.' : 'Connection through a proxy server.',
+                severity: ip.fraud ? 'high' : 'medium', ts: nowTs(3 * 60000),
+            });
+        }
+
+        if (phone.country) {
+            items.push({
+                title: 'Phone Country Mismatch',
+                desc: `Phone registered in ${phone.country}; account appears to be elsewhere.`,
+                severity: 'medium', ts: nowTs(),
+            });
+        }
+
+        if (iban.fraud || wallet.fraud) {
+            items.push({ title: 'Flagged Payment Destination', desc: 'Payment destination flagged as fraudulent.', severity: 'high', ts: nowTs() });
+        }
+
+        if (ua.fraud) {
+            items.push({ title: 'Suspicious Device', desc: 'Browser fingerprint consistent with automated tooling.', severity: 'medium', ts: nowTs() });
+        }
+
+        // ── Local scoring signals (from scoring-engine signals list) ────
+        if (hasSignal('Disposable email domain')) {
+            const sig = findSignal('Disposable email domain');
+            if (!items.some(i => i.title === 'Disposable Email')) {
+                items.push({ title: 'Disposable Email', desc: sig || 'Disposable email domain detected.', severity: 'high', ts: nowTs() });
+            }
+        }
+
+        if (hasSignal('Account is less than 24 hours old', 'Account is less than 7 days old')) {
+            const sig = findSignal('Account is less than');
+            items.push({ title: 'Very New Account', desc: sig || 'Account was recently created.', severity: 'high', ts: nowTs(2 * 60000) });
+        }
+
+        // ── Behavioural indicators (from scoring-engine signals list) ────
+        if (hasSignal('consistent amount escalation', 'amount escalation pattern')) {
+            const sig = findSignal('amount escalation');
+            items.push({
+                title: 'Escalating Claim Amounts',
+                desc: sig || 'Refund amounts are systematically increasing with each successive claim — a hallmark of deliberate policy exploitation.',
+                severity: 'high', ts: nowTs(2 * 60000),
+            });
+        }
+
+        if (hasSignal('high refund frequency')) {
+            const sig = findSignal('high refund frequency');
+            items.push({
+                title: 'Abnormal Claim Frequency',
+                desc: sig || 'Multiple refund claims filed within a short window — far above the account cohort average.',
+                severity: 'high', ts: nowTs(4 * 60000),
+            });
+        }
+
+        if (hasSignal('refund velocity')) {
+            const sig = findSignal('refund velocity');
+            items.push({
+                title: 'High Refund Velocity',
+                desc: sig || 'Unusually high total number of refund claims originating from this account.',
+                severity: 'high', ts: nowTs(6 * 60000),
+            });
+        }
+
+        if (hasSignal('repeated claim reason')) {
+            const sig = findSignal('repeated claim reason');
+            items.push({
+                title: 'Repeated Claim Reason',
+                desc: sig || 'The same refund reason has been submitted repeatedly.',
+                severity: 'medium', ts: nowTs(8 * 60000),
+            });
+        }
+
+        if (hasSignal('rapid sequential claim filings')) {
+            items.push({
+                title: 'Rapid Sequential Filings',
+                desc: 'Multiple claims were filed in quick succession, suggesting systematic rather than incidental behaviour.',
+                severity: 'medium', ts: nowTs(10 * 60000),
+            });
+        }
+
+        if (hasSignal('high refund approval rate')) {
+            const sig = findSignal('approval rate');
+            items.push({
+                title: 'Systematic Approval Exploitation',
+                desc: sig || 'A disproportionately high share of prior claims were approved, indicating repeated policy abuse.',
+                severity: 'high', ts: nowTs(12 * 60000),
+            });
+        }
+
+        // ── Fallback: high-value with no live scoring ───────────────────
+        if (signals.length === 0 && Number(tx.amount || 0) >= 1000 && items.length === 0) {
+            items.push({
+                title: 'High-Value Request',
+                desc: `Refund of ${fmt$(tx.amount, tx.currency)} is above average. Manual review recommended.`,
+                severity: 'medium', ts: nowTs(),
+            });
+        }
+
+        if (items.length === 0) {
+            items.push({ title: 'No Indicators Detected', desc: 'All automated checks passed with no fraud signals.', severity: 'low', ts: nowTs() });
+        }
+
+        return items;
+    }
+
+    /* ── Customer message renderer (plain text OR JSON with images) ──── */
+    function renderCustomerMessage(raw) {
+        const el = els.customerMessage;
+        if (!raw || !raw.trim()) {
+            el.className = 'msg-bubble empty';
+            el.innerHTML = 'No message provided by the customer.';
+            return;
+        }
+
+        let text = raw;
+        let images = [];
+
+        // Try to parse as JSON payload: {"text":"…","images":["url",…]}
+        if (raw.trim().startsWith('{')) {
+            try {
+                const parsed = JSON.parse(raw);
+                text   = parsed.text   || '';
+                images = Array.isArray(parsed.images) ? parsed.images : [];
+            } catch { /* fall through — treat entire string as plain text */ }
+        }
+
+        el.className = 'msg-bubble';
+
+        const textHtml = text
+            ? `<div class="msg-text">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
+            : '';
+
+        const imagesHtml = images.length
+            ? `<div class="msg-attachments">
+                 ${images.map(src => `
+                   <img class="msg-attachment-img"
+                        src="${src}"
+                        alt="Customer evidence photo"
+                        onclick="openLightbox('${src}')">`
+                 ).join('')}
+               </div>`
+            : '';
+
+        el.innerHTML = textHtml + imagesHtml;
+    }
+
+    /* ── Lightbox ──────────────────────────────────────────────────────── */
+    function openLightbox(src) {
+        document.querySelector('#lightboxImg').src = src;
+        document.querySelector('#lightbox').classList.add('open');
+    }
+    document.querySelector('#lightbox').addEventListener('click', () => {
+        document.querySelector('#lightbox').classList.remove('open');
+        document.querySelector('#lightboxImg').src = '';
+    });
+
+    function renderRisks(items) {
+        const flagged = items.filter(i => i.severity !== 'low').length;
+        els.risksSubheader.textContent = (items.length === 1 && items[0].severity === 'low')
+            ? 'No fraud indicators identified.'
+            : `${flagged} potential fraud indicator${flagged !== 1 ? 's' : ''} identified`;
+
+        els.risksList.innerHTML = items.map(i => `
+            <div class="risk-item">
+                <div class="risk-item-left">
+                    <div class="risk-icon ${i.severity !== 'high' ? i.severity : ''}">
+                        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div>
+                        <div class="risk-item-title">${i.title}</div>
+                        <div class="risk-item-desc">${i.desc}</div>
+                        <div class="risk-item-ts">Detected: ${i.ts}</div>
+                    </div>
+                </div>
+                <span class="sev-badge ${i.severity}">${i.severity.charAt(0).toUpperCase() + i.severity.slice(1)}</span>
+            </div>`).join('');
+    }
+
+    /* ── Render all UI from state ──────────────────────────────────────────── */
+    function renderAll() {
+        const tx      = state.transaction;
+        const acct    = state.account    || {};
+        const history = state.history    || [];
+        if (!tx) return;
+
+        // Real DB values
+        const score  = Math.round(state.score?.score ?? tx.riskScore ?? 0);
+        const status = tx.status || 'UNASSIGNED';
+        const t      = tone(score);
+        const canAct = status === 'UNDER_REVIEW' && tx.agentId != null;
+
+        // ── Top header ──────────────────────────────────────────────────────
+        const year = tx.createdAt ? new Date(tx.createdAt).getFullYear() : new Date().getFullYear();
+        els.caseId.textContent          = `RFD-${year}-${String(tx.id).padStart(3, '0')}`;
+        els.riskBadgeLabel.textContent  = riskLabel(score);
+        els.riskBadge.className         = `risk-badge ${t}`;
+        els.riskScoreDisplay.textContent = score || '—';
+        els.riskScoreDisplay.className  = `rs-num ${t}`;
+
+        // ── Left: Customer — all real DB fields ─────────────────────────────
+        const customerName = acct.name || '—';
+        els.customerName.textContent = customerName;
+
+        // Account age from real DB created_at
+        const acctCreatedAt = acct.createdAt;
+        let accountAgeDays = null;
+        if (acctCreatedAt) {
+            accountAgeDays = Math.floor((Date.now() - new Date(acctCreatedAt).getTime()) / 86400000);
+        }
+        const isNew = accountAgeDays !== null && accountAgeDays < 30;
+        els.accountStatus.textContent = isNew ? 'New' : 'Active';
+        els.accountStatus.className   = `acct-status ${isNew ? 'new' : 'active'}`;
+        els.emailField.textContent    = acct.email    || '—';
+        els.phoneField.textContent    = acct.phoneNumber || '—';
+        els.accountAge.textContent    = accountAgeDays !== null ? ageStr(accountAgeDays) : '—';
+        els.accountIdDisplay.textContent = `#${tx.accountId}`;
+
+        // Prior refunds from real history (exclude current tx)
+        const prior = history.filter(h => h.id !== tx.id);
+        els.prevRefunds.textContent = prior.length;
+
+        // Total claimed from history (sum of amounts for approved refunds)
+        const totalClaimed = prior
+            .filter(h => h.status === 'APPROVED')
+            .reduce((sum, h) => sum + Number(h.amount || 0), 0);
+        els.totalSpent.textContent = totalClaimed > 0
+            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: tx.currency || 'USD' }).format(totalClaimed)
+            : '—';
+
+        // ── Left: Order Details — all real DB fields ─────────────────────────
+        els.orderId.textContent       = tx.orderId    || '—';
+        els.orderDate.textContent     = tx.orderDate  || '—';
+
+        // Items: stored as JSON array string
+        let itemsArr = [];
+        if (tx.items) {
+            try { itemsArr = JSON.parse(tx.items); } catch { itemsArr = [tx.items]; }
+        }
+        els.itemsList.innerHTML = itemsArr.length
+            ? itemsArr.map(i => `<li>${i}</li>`).join('')
+            : '<li>—</li>';
+
+        els.paymentMethod.textContent = tx.paymentMethod  || '—';
+        els.currencyDisplay.textContent = tx.currency     || '—';
+        els.shippingAddr.textContent  = tx.shippingAddress || '—';
+        els.billingAddr.textContent   = tx.billingAddress  || '—';
+
+        // ── Right: Refund Summary — real DB fields ──────────────────────────
+        els.refundAmount.textContent   = fmt$(tx.amount, tx.currency);
+        els.requestDate.textContent    = fmtDate(tx.createdAt);
+        els.txIdDisplay.textContent    = `TXN-${String(tx.id).padStart(4, '0')}`;
+        els.statusPill.textContent     = statusLabel(status);
+        els.statusPill.className       = `status-pill ${status}`;
+
+        // ── Left: Customer Message (real DB field: reason_text) ────────────
+        renderCustomerMessage(tx.reasonText);
+
+        // ── Right: Agent Notes (real DB field: agent_note) ─────────────────
+        if (document.activeElement !== els.investigationNotes) {
+            els.investigationNotes.value = tx.agentNote || '';
+        }
+
+        // ── Right: Buttons ──────────────────────────────────────────────────
+        els.approveBtn.disabled = !canAct;
+        els.denyBtn.disabled    = !canAct;
+    }
+
+    /* ── API helpers ─────────────────────────────────────────────────────── */
+    function showError(msg) { els.errorText.textContent = msg; els.error.classList.add('visible'); }
+    function clearError()   { els.errorText.textContent = '';  els.error.classList.remove('visible'); }
+
+    async function request(url, opts = {}) {
+        const o = { ...opts };
+        if (o.body && typeof o.body === 'object') {
+            o.body    = JSON.stringify(o.body);
+            o.headers = { ...(o.headers || {}), 'Content-Type': 'application/json' };
+        }
+        const r    = await fetch(url, o);
+        const text = await r.text();
+        let data = {};
+        if (text) { try { data = JSON.parse(text); } catch { data = { message: text }; } }
+        if (!r.ok) throw new Error(data.message || `Request failed ${r.status}`);
+        return data;
+    }
+
+    async function loadTransaction() {
+        clearError();
+        const tx = await request(`/transaction/${transactionId}`);
+        state.transaction = tx;
+
+        // Fetch account and full history in parallel
+        const [acct, history] = await Promise.all([
+            request(`/account/${tx.accountId}`).catch(() => ({})),
+            request(`/transaction/account/${tx.accountId}`).catch(() => []),
+        ]);
+        state.account  = acct;
+        state.history  = Array.isArray(history) ? history : [];
+
+        renderAll();
+        renderRisks(buildRiskItems(tx, {}));
+    }
+
+    async function scoreTransaction() {
+        if (!state.transaction) return;
+        els.pageLoaderSub.textContent = 'Running risk analysis…';
+        clearError();
+        const result = await request(`/transaction/${state.transaction.id}/score`, { method: 'POST' });
+        state.score = result;
+        renderAll();
+        renderRisks(buildRiskItems(state.transaction, result));
+    }
+
+    async function persistDecision(status) {
+        if (!state.transaction) return;
+        if (state.transaction.status !== 'UNDER_REVIEW' || state.transaction.agentId == null) {
+            showError('Assign this case to yourself on the dashboard before recording a decision.');
+            return;
+        }
+        clearError();
+        try {
+            const note = els.investigationNotes.value.trim();
+            const isFinalDecision = status === 'APPROVED' || status === 'DENIED';
+            const payload = {
+                ...state.transaction,
+                status,
+                agentNote: isFinalDecision ? (note || state.transaction.agentNote || '') : (state.transaction.agentNote || ''),
+            };
+            const updated = await request(`/transaction/${state.transaction.id}`, { method: 'PUT', body: payload });
+            state.transaction = { ...updated, status };
+            renderAll();
+            renderRisks(buildRiskItems(state.transaction, state.score || {}));
+        } catch (err) {
+            showError(err.message);
+            renderAll(); // re-enable buttons
+        }
+    }
+
+    els.approveBtn.addEventListener('click', () => persistDecision('APPROVED'));
+    els.denyBtn.addEventListener('click',    () => persistDecision('DENIED'));
+
+    (async function init() {
+        try {
+            await loadTransaction();
+            await scoreTransaction();
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            els.pageLoader.classList.add('hidden');
+        }
+    })();
+</script>
+</body>
+</html>
