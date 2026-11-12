@@ -31,14 +31,6 @@ CREATE TABLE Agent (
 );
 
 
--- Compatibility table for DAO (lowercase 'agent' with different column names)
-CREATE TABLE IF NOT EXISTS agent (
-    agentId INT PRIMARY KEY AUTO_INCREMENT,
-    agentName VARCHAR(100),
-    agentEmail VARCHAR(150)
-);
-
-
 CREATE TABLE Transactions (
                               transaction_id    INT            PRIMARY KEY AUTO_INCREMENT,
                               agent_id          INT            DEFAULT NULL,

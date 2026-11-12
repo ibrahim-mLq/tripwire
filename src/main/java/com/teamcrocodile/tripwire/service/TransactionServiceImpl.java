@@ -50,7 +50,11 @@ public class TransactionServiceImpl implements TransactionService {
 
         validateStatusTransition(current, requestedStatus);
 
+        // Only the status and the agent's note can change here. Everything else is taken
+        // from the stored case, so a request can't alter the amount or move the case.
         transaction.setAgentId(current.getAgentId());
+        transaction.setAccountId(current.getAccountId());
+        transaction.setAmount(current.getAmount());
         transaction.setStatus(requestedStatus);
         scoreTransaction(transaction);
         transactionDao.updateTransaction(transaction);
@@ -65,12 +69,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction assignTransaction(int transactionId, int agentId) {
+        Transaction current = transactionDao.getTransactionById(transactionId);
+        // Assignment is a state transition too: UNASSIGNED -> UNDER_REVIEW only.
+        // Without this check, assigning an APPROVED or DENIED case would reopen it.
+        if (current.getStatus() != Status.UNASSIGNED) {
+            throw new IllegalStateException("Only unassigned cases can be assigned");
+        }
         transactionDao.assignTransaction(transactionId, agentId);
         return transactionDao.getTransactionById(transactionId);
     }
 
     @Override
     public Transaction unassignTransaction(int transactionId, int agentId) {
+        Transaction current = transactionDao.getTransactionById(transactionId);
+        if (current.getStatus() != Status.UNDER_REVIEW) {
+            throw new IllegalStateException("Only cases under review can be unassigned");
+        }
+        if (current.getAgentId() == null || current.getAgentId() != agentId) {
+            throw new IllegalStateException("This case is not assigned to that agent");
+        }
         transactionDao.unassignTransaction(transactionId, agentId);
         return transactionDao.getTransactionById(transactionId);
     }

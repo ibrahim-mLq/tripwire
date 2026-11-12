@@ -1,20 +1,28 @@
 package com.teamcrocodile.tripwire.controller;
 
 import com.teamcrocodile.tripwire.client.dto.DymoResponse;
+import com.teamcrocodile.tripwire.exception.ForbiddenException;
+import com.teamcrocodile.tripwire.model.Agent;
 import com.teamcrocodile.tripwire.model.Transaction;
-import com.teamcrocodile.tripwire.service.TransactionServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.teamcrocodile.tripwire.security.AuthInterceptor;
+import com.teamcrocodile.tripwire.service.AgentService;
+import com.teamcrocodile.tripwire.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** Refund cases. All routes need a logged-in agent (see WebConfig). */
 @RestController
 @RequestMapping("/transaction")
-@CrossOrigin
 public class TransactionController {
 
-    @Autowired
-    TransactionServiceImpl transactionService;
+    private final TransactionService transactionService;
+    private final AgentService agentService;
+
+    public TransactionController(TransactionService transactionService, AgentService agentService) {
+        this.transactionService = transactionService;
+        this.agentService = agentService;
+    }
 
     @GetMapping("/transactions")
     public List<Transaction> getAllTransactions() {
@@ -31,15 +39,19 @@ public class TransactionController {
         return transactionService.createTransaction(transaction);
     }
 
+    // Record a decision or note. Only the agent the case is assigned to (or an admin) may do this.
     @PutMapping("/{id}")
-    public Transaction updateTransaction(@PathVariable int id, @RequestBody Transaction transaction) {
-        // Make sure the path id is authoritative
-        transaction.setId(id);
+    public Transaction updateTransaction(@PathVariable int id,
+                                         @RequestBody Transaction transaction,
+                                         @SessionAttribute(AuthInterceptor.SESSION_AGENT_ID) int currentAgentId) {
+        Transaction current = transactionService.getTransactionById(id);
+        boolean isAssignee = current.getAgentId() != null && current.getAgentId() == currentAgentId;
+        if (!isAssignee && !isAdmin(currentAgentId)) {
+            throw new ForbiddenException("Only the agent assigned to this case can update it");
+        }
 
-        // Perform the update
+        transaction.setId(id); // the path id is authoritative
         transactionService.updateTransaction(transaction);
-
-        // Return the updated resource (fetch from DB to ensure latest state)
         return transactionService.getTransactionById(id);
     }
 
@@ -49,32 +61,50 @@ public class TransactionController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTransaction(@PathVariable int id) {
+    public void deleteTransaction(@PathVariable int id,
+                                  @SessionAttribute(AuthInterceptor.SESSION_AGENT_ID) int currentAgentId) {
+        agentService.requireAdmin(currentAgentId);
         transactionService.deleteTransaction(id);
     }
 
-    // Assign a transaction to an agent — sets agent_id and moves status to UNDER_REVIEW
+    // Assign an unassigned case: sets agent_id and moves status to UNDER_REVIEW.
+    // Analysts can only assign to themselves; an admin can assign to anyone.
     @PutMapping("/{id}/assign/{agentId}")
-    public Transaction assignTransaction(@PathVariable int id, @PathVariable int agentId) {
+    public Transaction assignTransaction(@PathVariable int id,
+                                         @PathVariable int agentId,
+                                         @SessionAttribute(AuthInterceptor.SESSION_AGENT_ID) int currentAgentId) {
+        requireSelfOrAdmin(agentId, currentAgentId);
         return transactionService.assignTransaction(id, agentId);
     }
 
-    // Unassign a transaction from an agent — clears agent_id and sets status to UNASSIGNED
+    // Hand a case back: clears agent_id and sets status to UNASSIGNED.
     @PutMapping("/{id}/unassign/{agentId}")
-    public Transaction unassignTransaction(@PathVariable int id, @PathVariable int agentId) {
+    public Transaction unassignTransaction(@PathVariable int id,
+                                           @PathVariable int agentId,
+                                           @SessionAttribute(AuthInterceptor.SESSION_AGENT_ID) int currentAgentId) {
+        requireSelfOrAdmin(agentId, currentAgentId);
         return transactionService.unassignTransaction(id, agentId);
     }
 
-    // Get all transactions assigned to a specific agent
     @GetMapping("/agent/{agentId}")
     public List<Transaction> getTransactionsByAgent(@PathVariable int agentId) {
         return transactionService.getTransactionsByAgentId(agentId);
     }
 
-    // Get full transaction history for an account (used by case detail page)
+    // Full transaction history for an account (used by the case detail page)
     @GetMapping("/account/{accountId}")
     public List<Transaction> getTransactionsByAccount(@PathVariable int accountId) {
         return transactionService.getTransactionsByAccountId(accountId);
     }
 
+    private void requireSelfOrAdmin(int agentId, int currentAgentId) {
+        if (agentId != currentAgentId && !isAdmin(currentAgentId)) {
+            throw new ForbiddenException("You can only assign or unassign cases for yourself");
+        }
+    }
+
+    private boolean isAdmin(int agentId) {
+        Agent agent = agentService.getAgentById(agentId);
+        return agent != null && agent.isAdmin();
+    }
 }

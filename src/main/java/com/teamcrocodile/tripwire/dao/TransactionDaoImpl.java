@@ -76,14 +76,12 @@ public class TransactionDaoImpl implements TransactionDao{
 
     @Override
     public List<Transaction> getAllTransactions() {
-        //TODO
         final String SELECT_ALL_TRANSACTIONS = "SELECT * FROM transactions";
         return jdbc.query(SELECT_ALL_TRANSACTIONS, new TransactionMapper());
     }
 
     @Override
     public Transaction getTransactionById(int id) {
-        //TODO
         final String SELECT_TRANSACTION_BY_ID = "SELECT * FROM transactions WHERE transaction_id = ?";
         return jdbc.queryForObject(SELECT_TRANSACTION_BY_ID, new TransactionMapper(), id);
     }
@@ -96,7 +94,6 @@ public class TransactionDaoImpl implements TransactionDao{
 
     @Override
     public void updateTransaction(Transaction transaction) {
-        //TODO
         final String UPDATE_TRANSACTIONS =
                 "UPDATE transactions " +
                         "SET agent_id = ?, status_id = ?, risk_score = ?, amount = ?, agent_note = ? " +
@@ -121,8 +118,10 @@ public class TransactionDaoImpl implements TransactionDao{
     @Override
     @Transactional
     public void assignTransaction(int transactionId, int agentId) {
-        // Set agent_id and move status to UNDER_REVIEW (status_id = 1)
-        final String SQL = "UPDATE transactions SET agent_id = ?, status_id = 1 WHERE transaction_id = ?";
+        // Set agent_id and move status to UNDER_REVIEW (status_id = 1).
+        // "AND status_id = 4" means only an UNASSIGNED case can be claimed, so if two
+        // agents click at the same moment the second update changes nothing.
+        final String SQL = "UPDATE transactions SET agent_id = ?, status_id = 1 WHERE transaction_id = ? AND status_id = 4";
         jdbc.update(SQL, agentId, transactionId);
     }
 
@@ -131,7 +130,7 @@ public class TransactionDaoImpl implements TransactionDao{
     public void unassignTransaction(int transactionId, int agentId) {
         // Only unassign if the transaction is currently assigned to the requesting agent
         // Clear agent_id and set status to UNASSIGNED (status_id = 4)
-        final String SQL = "UPDATE transactions SET agent_id = NULL, status_id = 4 WHERE transaction_id = ? AND agent_id = ?";
+        final String SQL = "UPDATE transactions SET agent_id = NULL, status_id = 4 WHERE transaction_id = ? AND agent_id = ? AND status_id = 1";
         jdbc.update(SQL, transactionId, agentId);
     }
 

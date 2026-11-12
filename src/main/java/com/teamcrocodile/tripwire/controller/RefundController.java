@@ -5,35 +5,36 @@ import com.teamcrocodile.tripwire.model.Account;
 import com.teamcrocodile.tripwire.model.Transaction;
 import com.teamcrocodile.tripwire.service.TransactionService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/refund")
-@CrossOrigin
 public class RefundController {
 
-    @Autowired
-    private AccountDao accountDao;
+    private final AccountDao accountDao;
+    private final TransactionService transactionService;
 
-    @Autowired
-    private TransactionService transactionService;
+    public RefundController(AccountDao accountDao, TransactionService transactionService) {
+        this.accountDao = accountDao;
+        this.transactionService = transactionService;
+    }
 
     /**
-     * Customer-facing endpoint — creates an Account and a linked Transaction
-     * in a single request.  The server captures the real IP from the HTTP request.
+     * Customer-facing endpoint: creates an Account and a linked Transaction in one request.
+     * Public, so it only hands back a case reference. The risk score and status stay internal.
      */
     @PostMapping("/submit")
-    public Transaction submitRefund(@RequestBody RefundSubmitRequest req,
-                                    HttpServletRequest httpRequest) {
+    public RefundReceipt submitRefund(@RequestBody RefundSubmitRequest req,
+                                      HttpServletRequest httpRequest) {
+        validate(req);
 
-        // Resolve the real client IP (honour X-Forwarded-For if present)
-        String ip = httpRequest.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isBlank()) ip = httpRequest.getRemoteAddr();
+        // Use the address of the actual connection. X-Forwarded-For is set by the client, so
+        // trusting it would let a fraudster choose the IP that feeds their own risk score.
+        // Behind a reverse proxy, set server.forward-headers-strategy so this resolves correctly.
+        String ip = httpRequest.getRemoteAddr();
 
-        // Create Account
         Account account = new Account();
         account.setName(req.getCustomerName());
         account.setEmail(req.getEmail());
@@ -42,7 +43,6 @@ public class RefundController {
         account.setIpAddress(ip);
         Account saved = accountDao.createAccount(account);
 
-        // Create Transaction
         Transaction tx = new Transaction();
         tx.setAccountId(saved.getId());
         tx.setAmount(req.getAmount());
@@ -55,8 +55,23 @@ public class RefundController {
         tx.setBillingAddress(req.getBillingAddress());
         tx.setReasonText(req.getReasonText());
 
-        return transactionService.createTransaction(tx);
+        Transaction created = transactionService.createTransaction(tx);
+        return new RefundReceipt(created.getId());
     }
+
+    private void validate(RefundSubmitRequest req) {
+        if (req.getCustomerName() == null || req.getCustomerName().isBlank()) {
+            throw new IllegalArgumentException("Customer name is required");
+        }
+        if (req.getEmail() == null || !req.getEmail().contains("@")) {
+            throw new IllegalArgumentException("A valid email address is required");
+        }
+        if (req.getAmount() == null || req.getAmount().signum() <= 0) {
+            throw new IllegalArgumentException("Refund amount must be greater than zero");
+        }
+    }
+
+    public record RefundReceipt(int id) {}
 
     // ── Request DTO ──────────────────────────────────────────────────────────
     public static class RefundSubmitRequest {

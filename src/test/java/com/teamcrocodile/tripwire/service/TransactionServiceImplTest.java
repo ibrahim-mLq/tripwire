@@ -116,7 +116,34 @@ class TransactionServiceImplTest {
         assertEquals(92.0, result.getRiskScore());
         verify(transactionDao).updateTransaction(update);
     }
+
+    @Test
+    void assignTransaction_rejectsCaseThatIsAlreadyDecided() {
+        TransactionServiceImpl service = new TransactionServiceImpl(transactionDao, dymoService);
+
+        Transaction current = new Transaction();
+        current.setId(1);
+        current.setStatus(Status.DENIED);
+        current.setAgentId(7);
+
+        when(transactionDao.getTransactionById(1)).thenReturn(current);
+
+        assertThrows(IllegalStateException.class, () -> service.assignTransaction(1, 8));
+        verify(transactionDao, never()).assignTransaction(1, 8);
+    }
+
+    @Test
+    void unassignTransaction_rejectsAgentWhoDoesNotHoldTheCase() {
+        TransactionServiceImpl service = new TransactionServiceImpl(transactionDao, dymoService);
+
+        Transaction current = new Transaction();
+        current.setId(1);
+        current.setStatus(Status.UNDER_REVIEW);
+        current.setAgentId(7);
+
+        when(transactionDao.getTransactionById(1)).thenReturn(current);
+
+        assertThrows(IllegalStateException.class, () -> service.unassignTransaction(1, 8));
+        verify(transactionDao, never()).unassignTransaction(1, 8);
+    }
 }
-
-
-

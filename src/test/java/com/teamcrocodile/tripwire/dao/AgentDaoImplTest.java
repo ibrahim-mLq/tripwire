@@ -21,7 +21,7 @@ class AgentDaoImplTest {
         Agent agent = new Agent();
         agent.setName(name);
         agent.setEmail(email);
-        agent.setPass_hash("hashedpassword");
+        agent.setPasswordHash("hashedpassword");
         return agent;
     }
 
@@ -36,7 +36,7 @@ class AgentDaoImplTest {
         Agent retrieved = agentDao.getAgentById(agent.getId());
         assertEquals("Alice", retrieved.getName());
         assertEquals("alice@test.com", retrieved.getEmail());
-        assertEquals("hashedpassword", retrieved.getPass_hash());
+        assertEquals("hashedpassword", retrieved.getPasswordHash());
     }
 
     @Test
@@ -80,13 +80,13 @@ class AgentDaoImplTest {
 
         agent.setName("Evelyn");
         agent.setEmail("evelyn@test.com");
-        agent.setPass_hash("newhashedpassword");
+        agent.setPasswordHash("newhashedpassword");
         agentDao.updateAgent(agent);
 
         Agent updated = agentDao.getAgentById(agent.getId());
         assertEquals("Evelyn", updated.getName());
         assertEquals("evelyn@test.com", updated.getEmail());
-        assertEquals("newhashedpassword", updated.getPass_hash());
+        assertEquals("newhashedpassword", updated.getPasswordHash());
     }
 
     @Test
@@ -97,7 +97,7 @@ class AgentDaoImplTest {
         agentDao.updatePasswordHash(agent.getId(), "brandnewhashedpassword");
 
         Agent updated = agentDao.getAgentById(agent.getId());
-        assertEquals("brandnewhashedpassword", updated.getPass_hash());
+        assertEquals("brandnewhashedpassword", updated.getPasswordHash());
         assertEquals("Frank", updated.getName());
         assertEquals("frank@test.com", updated.getEmail());
     }
@@ -110,7 +110,7 @@ class AgentDaoImplTest {
         int id = agent.getId();
         agentDao.deleteAgent(id);
 
-        assertThrows(Exception.class, () -> agentDao.getAgentById(id));
+        assertNull(agentDao.getAgentById(id));
     }
 
     @Test
@@ -121,6 +121,6 @@ class AgentDaoImplTest {
         agentDao.updateProfilePicture(agent.getId(), "https://example.com/pics/hank.jpg");
 
         Agent updated = agentDao.getAgentById(agent.getId());
-        assertEquals("https://example.com/pics/hank.jpg", updated.getProfile_picture());
+        assertEquals("https://example.com/pics/hank.jpg", updated.getProfilePicture());
     }
 }

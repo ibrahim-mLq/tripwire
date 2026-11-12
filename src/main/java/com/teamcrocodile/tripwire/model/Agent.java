@@ -1,13 +1,15 @@
 package com.teamcrocodile.tripwire.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Agent {
 
     private int id;
     private String name;
     private String email;
-    private String pass_hash;
+    private String passwordHash;
     private String role = AgentRole.ANALYST.name();
-    private String profile_picture;
+    private String profilePicture;
 
     public int getId() {
         return id;
@@ -33,12 +35,14 @@ public class Agent {
         this.email = email;
     }
 
-    public String getPass_hash() {
-        return pass_hash;
+    // Never serialised: the hash must not leave the server in any API response.
+    @JsonIgnore
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPass_hash(String pass_hash) {
-        this.pass_hash = pass_hash;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public String getRole() {
@@ -49,19 +53,21 @@ public class Agent {
         this.role = role;
     }
 
+    @JsonIgnore
     public AgentRole getAgentRole() {
         return AgentRole.fromString(role);
     }
 
+    @JsonIgnore
     public boolean isAdmin() {
         return getAgentRole() == AgentRole.ADMIN;
     }
 
-    public String getProfile_picture() {
-        return profile_picture;
+    public String getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setProfile_picture(String profile_picture) {
-        this.profile_picture = profile_picture;
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

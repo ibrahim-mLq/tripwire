@@ -29,7 +29,7 @@ class AgentServiceImplTest {
 
         Agent agent = new Agent();
         agent.setId(1);
-        agent.setPass_hash("{noop}tripwire123");
+        agent.setPasswordHash("{noop}tripwire123");
 
         when(agentDao.getAgentById(1)).thenReturn(agent);
 
@@ -49,7 +49,7 @@ class AgentServiceImplTest {
 
         Agent agent = new Agent();
         agent.setId(1);
-        agent.setPass_hash("{noop}tripwire123");
+        agent.setPasswordHash("{noop}tripwire123");
 
         when(agentDao.getAgentById(1)).thenReturn(agent);
 

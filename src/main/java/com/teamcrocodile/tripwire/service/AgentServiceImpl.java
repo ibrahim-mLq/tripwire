@@ -42,7 +42,7 @@ public class AgentServiceImpl implements AgentService {
             return false;
         }
 
-        String stored = agent.getPass_hash();
+        String stored = agent.getPasswordHash();
         if (stored == null) {
             return false;
         }
@@ -67,7 +67,7 @@ public class AgentServiceImpl implements AgentService {
             throw new IllegalArgumentException("Agent with id " + id + " not found");
         }
 
-        String stored = agent.getPass_hash();
+        String stored = agent.getPasswordHash();
         if (stored == null || stored.isBlank()) {
             throw new IllegalStateException("Password is not set for this account");
         }
@@ -79,14 +79,6 @@ public class AgentServiceImpl implements AgentService {
         }
 
         agentDao.updatePasswordHash(id, passwordEncoder.encode(newPassword));
-    }
-
-    @Override
-    public Agent addNewAgent(Agent agent) {
-        if (agent.getRole() == null || agent.getRole().isBlank()) {
-            agent.setRole(AgentRole.ANALYST.name());
-        }
-        return agentDao.createAgent(agent);
     }
 
     @Override
@@ -103,7 +95,7 @@ public class AgentServiceImpl implements AgentService {
         Agent agent = new Agent();
         agent.setName(name.trim());
         agent.setEmail(normalizedEmail);
-        agent.setPass_hash(passwordEncoder.encode(password));
+        agent.setPasswordHash(passwordEncoder.encode(password));
         agent.setRole(AgentRole.ANALYST.name());
         return agentDao.createAgent(agent);
     }
@@ -134,23 +126,6 @@ public class AgentServiceImpl implements AgentService {
     }
 
     @Override
-    public Agent updateAgentData(int id, Agent agent) {
-        Agent existingAgent = agentDao.getAgentById(id);
-        if (existingAgent == null) {
-            throw new IllegalArgumentException("Agent with id " + id + " not found");
-        }
-        existingAgent.setName(agent.getName());
-        existingAgent.setEmail(agent.getEmail());
-        agentDao.updateAgent(existingAgent);
-        return existingAgent;
-    }
-
-    @Override
-    public void deleteAgent(int id) {
-        agentDao.deleteAgent(id);
-    }
-
-    @Override
     public List<Agent> getAllAgents() {
         return agentDao.getAllAgents();
     }
@@ -168,10 +143,12 @@ public class AgentServiceImpl implements AgentService {
     }
 
     private boolean matchesPassword(String rawPassword, String storedPassword) {
-        if (storedPassword.startsWith("{")) {
-            return passwordEncoder.matches(rawPassword, storedPassword);
+        // Stored values carry an encoder prefix such as {bcrypt}. Anything without one is
+        // not a valid hash, and is never compared as plain text.
+        if (!storedPassword.startsWith("{")) {
+            return false;
         }
-        return rawPassword.equals(storedPassword);
+        return passwordEncoder.matches(rawPassword, storedPassword);
     }
 
     private void validateNewAgentInput(String name, String email, String password) {

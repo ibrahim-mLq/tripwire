@@ -120,6 +120,21 @@
     </div>
 </div>
 <script>
+    // The server keeps the login in a session. If it has expired (or the server restarted),
+    // API calls return 401 with X-Auth-Required, so clear the cached agent and go to login.
+    (function () {
+        const realFetch = window.fetch;
+        window.fetch = async function (...args) {
+            const res = await realFetch.apply(this, args);
+            if (res.status === 401 && res.headers.get("X-Auth-Required")) {
+                localStorage.removeItem("agent");
+                window.location.href = "/login.html";
+            }
+            return res;
+        };
+    })();
+</script>
+<script>
     const agentJson = localStorage.getItem("agent");
     if (!agentJson) window.location.href = "/login.html";
     const currentAgent = JSON.parse(agentJson);
@@ -135,6 +150,7 @@
     }
 
     document.querySelector("#logoutBtn").addEventListener("click", () => {
+        fetch("/auth/logout", { method: "POST", keepalive: true }).catch(() => {});
         localStorage.removeItem("agent");
         window.location.href = "/login.html";
     });
@@ -157,7 +173,6 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    adminId: currentAgent.id,
                     name: document.querySelector("#name").value.trim(),
                     email: document.querySelector("#email").value.trim(),
                     password
@@ -177,7 +192,7 @@
 
     async function loadTeam() {
         try {
-            const res = await fetch(`/agent/team?adminId=${currentAgent.id}`);
+            const res = await fetch("/agent/team");
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Could not load team");
             teamMembers = data;
@@ -207,7 +222,7 @@
         const member = teamMembers.find(a => a.id === id);
         if (!confirm(`Remove ${member?.name || "this user"}? Their assigned cases will be unassigned.`)) return;
         try {
-            const res = await fetch(`/agent/admin/${id}?adminId=${currentAgent.id}`, { method: "DELETE" });
+            const res = await fetch(`/agent/admin/${id}`, { method: "DELETE" });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || "Could not remove user");
             showFeedback("Team member removed.", false);

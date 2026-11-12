@@ -1,18 +1,9 @@
 package com.teamcrocodile.tripwire.controller.dto;
 
 public class CreateAgentRequest {
-    private int adminId;
     private String name;
     private String email;
     private String password;
-
-    public int getAdminId() {
-        return adminId;
-    }
-
-    public void setAdminId(int adminId) {
-        this.adminId = adminId;
-    }
 
     public String getName() {
         return name;

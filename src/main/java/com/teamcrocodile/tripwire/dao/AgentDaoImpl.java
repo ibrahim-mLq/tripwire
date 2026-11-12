@@ -30,7 +30,7 @@ public class AgentDaoImpl implements AgentDao {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", agent.getName())
                 .addValue("email", agent.getEmail())
-                .addValue("password_hash", agent.getPass_hash())
+                .addValue("password_hash", agent.getPasswordHash())
                 .addValue("role", role);
 
         Number generatedId = insert.executeAndReturnKey(params);
@@ -62,7 +62,7 @@ public class AgentDaoImpl implements AgentDao {
     @Override
     public void updateAgent(Agent agent) {
         final String sql = "UPDATE Agent SET name = ?, email = ?, password_hash = ?, role = ? WHERE agent_id = ?";
-        jdbcTemplate.update(sql, agent.getName(), agent.getEmail(), agent.getPass_hash(), agent.getRole(), agent.getId());
+        jdbcTemplate.update(sql, agent.getName(), agent.getEmail(), agent.getPasswordHash(), agent.getRole(), agent.getId());
     }
 
     @Override
@@ -89,9 +89,9 @@ public class AgentDaoImpl implements AgentDao {
         agent.setId(rs.getInt("agent_id"));
         agent.setName(rs.getString("name"));
         agent.setEmail(rs.getString("email"));
-        agent.setPass_hash(rs.getString("password_hash"));
+        agent.setPasswordHash(rs.getString("password_hash"));
         agent.setRole(rs.getString("role"));
-        agent.setProfile_picture(rs.getString("profile_picture"));
+        agent.setProfilePicture(rs.getString("profile_picture"));
         return agent;
     }
 }

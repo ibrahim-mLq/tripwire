@@ -64,7 +64,7 @@ class TransactionDaoImplTest {
         Agent agent = new Agent();
         agent.setName("Test Agent");
         agent.setEmail("agent@test.com");
-        agent.setPass_hash("hashedpassword");
+        agent.setPasswordHash("hashedpassword");
         agentDao.createAgent(agent);
 
         Transaction transaction = new Transaction();
@@ -96,7 +96,7 @@ class TransactionDaoImplTest {
         Agent agent = new Agent();
         agent.setName("Test Agent NUMBER TWOOOO");
         agent.setEmail("2nd_agent@test.com");
-        agent.setPass_hash("hashedpassword");
+        agent.setPasswordHash("hashedpassword");
         agentDao.createAgent(agent);
 
         Transaction transaction = new Transaction();

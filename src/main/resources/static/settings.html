@@ -501,6 +501,21 @@
 </main>
 
 <script>
+    // The server keeps the login in a session. If it has expired (or the server restarted),
+    // API calls return 401 with X-Auth-Required, so clear the cached agent and go to login.
+    (function () {
+        const realFetch = window.fetch;
+        window.fetch = async function (...args) {
+            const res = await realFetch.apply(this, args);
+            if (res.status === 401 && res.headers.get("X-Auth-Required")) {
+                localStorage.removeItem("agent");
+                window.location.href = "/login.html";
+            }
+            return res;
+        };
+    })();
+</script>
+<script>
     const raw = localStorage.getItem("agent");
     if (!raw) {
         window.location.href = "/login.html";
@@ -528,6 +543,7 @@
     }
 
     document.querySelector("#logoutBtn").addEventListener("click", () => {
+        fetch("/auth/logout", { method: "POST", keepalive: true }).catch(() => {});
         localStorage.removeItem("agent");
         window.location.href = "/login.html";
     });

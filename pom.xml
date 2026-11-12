@@ -11,10 +11,10 @@
     </parent>
 
     <groupId>com.teamcrocodile</groupId>
-    <artifactId>c451-final-project-team-crocodile</artifactId>
+    <artifactId>tripwire</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>c451-final-project-team-crocodile</name>
-    <description>Spring Boot application for the C451 final project</description>
+    <name>tripwire</name>
+    <description>Fraud triage and refund case management system</description>
 
     <properties>
         <java.version>21</java.version>

@@ -2,18 +2,23 @@ package com.teamcrocodile.tripwire.controller;
 
 import com.teamcrocodile.tripwire.dao.AccountDao;
 import com.teamcrocodile.tripwire.model.Account;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/** Read-only view of customer accounts for logged-in agents. Accounts are created by refund submissions. */
 @RestController
 @RequestMapping("/account")
-@CrossOrigin
 public class AccountController {
 
-    @Autowired
-    private AccountDao accountDao;
+    private final AccountDao accountDao;
+
+    public AccountController(AccountDao accountDao) {
+        this.accountDao = accountDao;
+    }
 
     @GetMapping
     public List<Account> getAllAccounts() {
@@ -24,10 +29,4 @@ public class AccountController {
     public Account getAccountById(@PathVariable int id) {
         return accountDao.getAccountById(id);
     }
-
-    @PostMapping
-    public Account createAccount(@RequestBody Account account) {
-        return accountDao.createAccount(account);
-    }
 }
-
